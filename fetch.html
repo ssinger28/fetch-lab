@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fetch Demo</title>
+  <title>Weather Fetch Demo</title>
   <style>
     * {
       box-sizing: border-box;
@@ -57,13 +57,46 @@
 <body>
 
   <div id="output">
-    <p>Click the button below to make something happen.</p>
+    <p>Click the button below to get the weather data.</p>
   </div>
 
-  <button type="button">Do Something!</button>
+  <button type="button" id="fetchButton">Get Weather in St. Louis!</button>
 
   <script>
-    // your code here
+    document.getElementById('fetchButton').addEventListener('click', () => {
+      // Define the latitude and longitude for St. Louis
+      const latitude = 38.6270;
+      const longitude = -90.1994;
+
+      const gridUrl = `https://api.weather.gov/points/${latitude},${longitude}`;
+
+      fetch(gridUrl)
+        .then(response => response.json())
+        .then(gridData => {
+          const forecastUrl = gridData.properties.forecast;
+          return fetch(forecastUrl);
+        })
+        .then(response => response.json())
+        .then(forecastData => {
+          const periods = forecastData.properties.periods;
+          const currentWeather = periods[0]; 
+
+          const weatherDescription = currentWeather.shortForecast;
+          const temperature = currentWeather.temperature;
+          const temperatureUnit = currentWeather.temperatureUnit;
+
+          document.getElementById('output').innerHTML = `
+            <p>Current Weather: <strong>${weatherDescription}</strong></p>
+            <p>Temperature: <strong>${temperature}° ${temperatureUnit}</strong></p>
+          `;
+        })
+        .catch(error => {
+          document.getElementById('output').innerHTML = `
+            <p>Failed to fetch weather data. Please try again later.</p>
+          `;
+          console.error('Error fetching the weather data:', error);
+        });
+    });
   </script>
 </body>
 </html>
