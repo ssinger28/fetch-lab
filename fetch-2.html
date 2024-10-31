@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Fetch Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      min-height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    #output {
+      max-width: 800px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 0.25rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+      padding: 1rem 2rem;
+      background-color: #007bff;
+      font-size: 1.5rem;
+      color: #fff;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      box-shadow: 0 4px 5px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px) scale(1.05);
+    }
+
+    button:active {
+      transform: translateY(0) scale(1);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="output">
+    <p>Click the button below to get the weather data.</p>
+  </div>
+
+  <button type="button" id="fetchButton">Get Weather in St. Louis!</button>
+
+  <script>
+    document.getElementById('fetchButton').addEventListener('click', () => {
+      // Define the latitude and longitude for St. Louis
+      const latitude = 38.6270;
+      const longitude = -90.1994;
+
+      const gridUrl = `https://api.weather.gov/points/${latitude},${longitude}`;
+
+      fetch(gridUrl)
+        .then(response => response.json())
+        .then(gridData => {
+          const forecastUrl = gridData.properties.forecast;
+          return fetch(forecastUrl);
+        })
+        .then(response => response.json())
+        .then(forecastData => {
+          const periods = forecastData.properties.periods;
+          const currentWeather = periods[0]; 
+
+          const weatherDescription = currentWeather.shortForecast;
+          const temperature = currentWeather.temperature;
+          const temperatureUnit = currentWeather.temperatureUnit;
+
+          document.getElementById('output').innerHTML = `
+            <p>Current Weather: <strong>${weatherDescription}</strong></p>
+            <p>Temperature: <strong>${temperature}° ${temperatureUnit}</strong></p>
+          `;
+        })
+        .catch(error => {
+          document.getElementById('output').innerHTML = `
+            <p>Failed to fetch weather data. Please try again later.</p>
+          `;
+          console.error('Error fetching the weather data:', error);
+        });
+    });
+  </script>
+</body>
+</html>
